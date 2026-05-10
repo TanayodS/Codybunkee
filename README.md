@@ -1,2 +1,2 @@
 # Bunkee
-My name is Tanayod Suthimathakorn
+<h1 align="center">Tanayod Suthimathakorn</h1>
