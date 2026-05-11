@@ -1,0 +1,67 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+def scrape_with_selenium():
+    """Scrape using Selenium for JavaScript-rendered content"""
+    url = "https://top50.workventure.com/"
+
+    # Setup Chrome driver
+    options = webdriver.ChromeOptions()
+    options.add_argument('--start-maximized')
+    # Uncomment next line if you want headless mode (no window popup)
+    # options.add_argument('--headless')
+
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        print("Opening website...")
+        driver.get(url)
+
+        # Wait for content to load (adjust time if needed)
+        print("Waiting for page to load...")
+        time.sleep(5)
+
+        # Get page source after JavaScript renders
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        print("Parsing page content...")
+        print(f"Page title: {soup.title.string if soup.title else 'No title'}")
+
+        # Try different selectors
+        companies = []
+
+        # Print first 1000 chars to debug
+        print("\n--- Page Content (first 1000 chars) ---")
+        print(page_source[:1000])
+        print("--- End Preview ---\n")
+
+        # Look for company elements (adjust based on actual HTML)
+        company_elements = soup.find_all(['div', 'tr', 'li'],
+                                         class_=lambda x: x and 'company' in x.lower() if x else False)
+
+        if not company_elements:
+            # Try broader search
+            company_elements = soup.find_all(['div', 'tr', 'article', 'section'])
+
+        print(f"Found {len(company_elements)} potential company elements")
+
+        for idx, elem in enumerate(company_elements[:50], 1):
+            print(f"\n--- Element {idx} ---")
+            print(elem.get_text()[:200])
+
+        return companies
+
+    finally:
+        driver.quit()
+
+
+if __name__ == "__main__":
+    scrape_with_selenium()
